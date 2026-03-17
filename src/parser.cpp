@@ -67,12 +67,48 @@ std::unique_ptr<ASTNode> Parser::parseExpression() {
     return left;
 }
 
-std::unique_ptr<ASTNode> Parser::parse() {
-    // 我们的微型编译器目前只认得 int 开头的变量声明
-    if (peek().type == TokenType::Keyword_Int) {
-        return parseVariableDecl();
+// 解析代码块：一直读，直到遇到 '}'
+std::unique_ptr<ASTNode> Parser::parseBlock() {
+    advance(); // 吃掉 '{'
+    auto block = std::make_unique<BlockNode>();
+
+    // 只要没遇到 '}' 也没遇到文件结尾，就一直循环解析语句
+    while (peek().type != TokenType::RBrace && peek().type != TokenType::EndOfFile) {
+        block->addStatement(parseStatement()); // 解析一条语句，塞进 block 里
     }
-    return nullptr;
+
+    if (!match(TokenType::RBrace)) {
+        throw std::runtime_error("Syntax Error: Expected '}' at the end of block");
+    }
+    return block;
+}
+
+// 语句分发器：根据当前 Token 决定调用哪个解析函数
+std::unique_ptr<ASTNode> Parser::parseStatement() {
+    if (peek().type == TokenType::Keyword_Int) {
+        return parseVariableDecl(); // 我们之前写的变量声明逻辑
+    } 
+    else if (peek().type == TokenType::Keyword_Return) {
+        advance(); // 吃掉 "return"
+        auto expr = parseExpression(); // 解析 return 后面的表达式
+        if (!match(TokenType::Semicolon)) throw std::runtime_error("Expected ';' after return value");
+        return std::make_unique<ReturnNode>(std::move(expr));
+    }
+    else if (peek().type == TokenType::LBrace) {
+        return parseBlock(); // 如果遇到 '{'，说明语句里面套着一个子代码块
+    }
+    
+    throw std::runtime_error("Syntax Error: Unknown statement");
+}
+
+// 彻底修改最顶层的 parse 函数
+std::unique_ptr<ASTNode> Parser::parse() {
+    // 整个文件其实就可以看作是一个隐形的、最大的 Block
+    auto program = std::make_unique<BlockNode>();
+    while (peek().type != TokenType::EndOfFile) {
+        program->addStatement(parseStatement());
+    }
+    return program;
 }
 
 std::unique_ptr<ASTNode> Parser::parseVariableDecl() {
@@ -81,7 +117,7 @@ std::unique_ptr<ASTNode> Parser::parseVariableDecl() {
     if (idToken.type != TokenType::Identifier) throw std::runtime_error("Expected identifier");
     if (!match(TokenType::Assign)) throw std::runtime_error("Expected '='");
 
-    // 【魔法发生在这里】
+
     // 直接把等号后面的所有东西，交给统一的表达式解析器！
     auto initExpr = parseExpression();
 

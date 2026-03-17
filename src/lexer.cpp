@@ -37,6 +37,9 @@ std::vector<Token> Scanner::tokenize() {
             }
             if (str == "int") {
                 tokens.push_back({TokenType::Keyword_Int, str});
+            }
+            else if (str == "return") { // 【新增】
+                tokens.push_back({TokenType::Keyword_Return, str});
             } else {
                 tokens.push_back({TokenType::Identifier, str});
             }
@@ -58,6 +61,8 @@ std::vector<Token> Scanner::tokenize() {
         else if (c == '(') { tokens.push_back({TokenType::LParen, "("}); advance(); }
         else if (c == ')') { tokens.push_back({TokenType::RParen, ")"}); advance(); }
         else if (c == ';') { tokens.push_back({TokenType::Semicolon, ";"}); advance(); }
+        else if (c == '{') { tokens.push_back({TokenType::LBrace, "{"}); advance(); }
+        else if (c == '}') { tokens.push_back({TokenType::RBrace, "}"}); advance();}
         // 4. 其他不认识的字符
         else {
             tokens.push_back({TokenType::Unknown, std::string(1, c)});

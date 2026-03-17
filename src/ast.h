@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <vector>
 
 // 所有 AST 节点的基类
 class ASTNode {
@@ -67,6 +68,37 @@ public:
         if (initExpr) {
             initExpr->print(indent + 4); // 子节点缩进 4 个空格
         }
+    }
+};
+
+// 返回语句节点 (例如 "return a + 5;")
+class ReturnNode : public ASTNode {
+    std::unique_ptr<ASTNode> returnValue;
+public:
+    ReturnNode(std::unique_ptr<ASTNode> expr) : returnValue(std::move(expr)) {}
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "ReturnNode\n";
+        if (returnValue) returnValue->print(indent + 4);
+    }
+};
+
+// 代码块节点 (例如 "{ int a = 1; return a; }")
+class BlockNode : public ASTNode {
+    // 用一个 vector 装着这个大括号里所有的语句
+    std::vector<std::unique_ptr<ASTNode>> statements; 
+public:
+    // 提供一个向块里添加语句的方法
+    void addStatement(std::unique_ptr<ASTNode> stmt) {
+        statements.push_back(std::move(stmt));
+    }
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ') << "BlockNode {\n";
+        // 遍历打印每一条语句
+        for (const auto& stmt : statements) {
+            stmt->print(indent + 4);
+        }
+        std::cout << std::string(indent, ' ') << "}\n";
     }
 };
 

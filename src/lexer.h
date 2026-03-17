@@ -6,13 +6,12 @@
 
 // 定义 Token 的类型
 enum class TokenType {
-    Keyword_Int, Identifier, Number, Assign, Semicolon,
-    Plus,       // "+"
-    Minus,      // "-"
-    Star,       // "*"
-    Slash,      // "/"
-    LParen,     // "("
-    RParen,     // ")"
+    Keyword_Int, 
+    Keyword_Return, // 【新增】"return"
+    Identifier, Number, Assign, Semicolon,
+    Plus, Minus, Star, Slash, LParen, RParen,
+    LBrace,         // 【新增】"{"
+    RBrace,         // 【新增】"}"
     EndOfFile, Unknown
 };
 // Token 结构体

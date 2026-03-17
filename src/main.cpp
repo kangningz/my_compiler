@@ -3,7 +3,13 @@
 #include "parser.h"
 
 int main() {
-    std::string code = "int a = 10 + 5 * (2 - b);";
+    std::string code = R"(
+    {
+        int a = 10;
+        int b = 1 + 5 * 2;
+        return b - 3;
+    }
+)";
     std::cout << "Source Code: " << code << "\n\n";
 
     // 1. 词法分析 (Lexer)
@@ -32,6 +38,3 @@ int main() {
 
     return 0;
 }
-//cmake -G "MinGW Makefiles" ..
-//mingw32-make
-//.\my_compiler.exe
