@@ -16,12 +16,6 @@ iostream
 vector
 -
 
-/home/kangningz/project/my_compiler/src/lexer.cpp
-lexer.h
-/home/kangningz/project/my_compiler/src/lexer.h
-cctype
--
-
 /home/kangningz/project/my_compiler/src/lexer.h
 string
 -
@@ -35,12 +29,6 @@ lexer.h
 /home/kangningz/project/my_compiler/src/lexer.h
 parser.h
 /home/kangningz/project/my_compiler/src/parser.h
-
-/home/kangningz/project/my_compiler/src/parser.cpp
-parser.h
-/home/kangningz/project/my_compiler/src/parser.h
-stdexcept
--
 
 /home/kangningz/project/my_compiler/src/parser.h
 lexer.h

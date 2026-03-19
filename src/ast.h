@@ -7,18 +7,16 @@
 #include <vector>
 
 // ASTNode：所有语法树节点的基类
-// 以后所有具体节点都继承它
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
 
-    // print 用来把语法树打印出来
-    // indent 表示缩进层级，方便看树状结构
+    // print：以树状结构打印 AST
     virtual void print(int indent = 0) const = 0;
 };
 
 // NumberNode：数字字面量节点
-// 例如：10、123、42
+// 例如：10、123
 class NumberNode : public ASTNode {
     std::string value;
 
@@ -31,8 +29,8 @@ public:
     }
 };
 
-// IdentifierNode：变量名/标识符节点
-// 例如：a、main、result
+// IdentifierNode：标识符节点
+// 例如：a、main
 class IdentifierNode : public ASTNode {
     std::string name;
 
@@ -47,11 +45,6 @@ public:
 
 // BinaryOpNode：二元运算节点
 // 例如：a + 1、b * 2
-//
-// 结构上它会有：
-// - 运算符 op
-// - 左子树 left
-// - 右子树 right
 class BinaryOpNode : public ASTNode {
     std::string op;
     std::unique_ptr<ASTNode> left;
@@ -67,7 +60,6 @@ public:
         std::cout << std::string(indent, ' ')
                   << "BinaryOpNode: " << op << "\n";
 
-        // 继续打印左右子树
         left->print(indent + 4);
         right->print(indent + 4);
     }
@@ -76,9 +68,9 @@ public:
 // VariableDeclNode：变量声明节点
 // 例如：int a = 10;
 class VariableDeclNode : public ASTNode {
-    std::string type;                     // 变量类型，例如 int
+    std::string type;                     // 类型，例如 int
     std::string name;                     // 变量名，例如 a
-    std::unique_ptr<ASTNode> initExpr;    // 初始化表达式，例如 10 或 1 + 2
+    std::unique_ptr<ASTNode> initExpr;    // 初始化表达式
 
 public:
     VariableDeclNode(std::string t,
@@ -91,7 +83,6 @@ public:
                   << "VariableDeclNode (Type: " << type
                   << ", Name: " << name << ")\n";
 
-        // 如果有初始化表达式，就继续打印
         if (initExpr) {
             initExpr->print(indent + 4);
         }
@@ -101,7 +92,7 @@ public:
 // AssignmentNode：赋值语句节点
 // 例如：a = a + 1;
 class AssignmentNode : public ASTNode {
-    std::string name;                  // 被赋值的变量名
+    std::string name;                  // 左边被赋值的变量名
     std::unique_ptr<ASTNode> value;    // 右边的表达式
 
 public:
@@ -137,6 +128,77 @@ public:
     }
 };
 
+// IfNode：if / else 语句节点
+// 例如：if (a < 10) { ... } else { ... }
+class IfNode : public ASTNode {
+    std::unique_ptr<ASTNode> condition;   // if 条件
+    std::unique_ptr<ASTNode> thenBlock;   // 条件成立时执行的语句块
+    std::unique_ptr<ASTNode> elseBlock;   // else 部分，可为空
+
+public:
+    IfNode(std::unique_ptr<ASTNode> cond,
+           std::unique_ptr<ASTNode> thenStmt,
+           std::unique_ptr<ASTNode> elseStmt = nullptr)
+        : condition(std::move(cond)),
+          thenBlock(std::move(thenStmt)),
+          elseBlock(std::move(elseStmt)) {}
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ')
+                  << "IfNode\n";
+
+        std::cout << std::string(indent + 4, ' ')
+                  << "Condition:\n";
+        if (condition) {
+            condition->print(indent + 8);
+        }
+
+        std::cout << std::string(indent + 4, ' ')
+                  << "Then:\n";
+        if (thenBlock) {
+            thenBlock->print(indent + 8);
+        }
+
+        // 如果有 else，就继续打印
+        if (elseBlock) {
+            std::cout << std::string(indent + 4, ' ')
+                      << "Else:\n";
+            elseBlock->print(indent + 8);
+        }
+    }
+};
+
+// WhileNode：while 循环节点
+// 例如：while (a < 5) { ... }
+class WhileNode : public ASTNode {
+    std::unique_ptr<ASTNode> condition;   // 循环条件
+    std::unique_ptr<ASTNode> body;        // 循环体
+
+public:
+    WhileNode(std::unique_ptr<ASTNode> cond,
+              std::unique_ptr<ASTNode> loopBody)
+        : condition(std::move(cond)),
+          body(std::move(loopBody)) {}
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ')
+                  << "WhileNode\n";
+
+        std::cout << std::string(indent + 4, ' ')
+                  << "Condition:\n";
+        if (condition) {
+            condition->print(indent + 8);
+        }
+
+        std::cout << std::string(indent + 4, ' ')
+                  << "Body:\n";
+        if (body) {
+            body->print(indent + 8);
+        }
+    }
+};
+
+
 // BlockNode：代码块节点
 // 例如：
 // {
@@ -147,7 +209,7 @@ class BlockNode : public ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
 
 public:
-    // 往代码块里加入一条语句
+    // 添加一条语句到 block 中
     void addStatement(std::unique_ptr<ASTNode> stmt) {
         statements.push_back(std::move(stmt));
     }
@@ -156,7 +218,6 @@ public:
         std::cout << std::string(indent, ' ')
                   << "BlockNode {\n";
 
-        // 依次打印 block 里的每条语句
         for (const auto& stmt : statements) {
             stmt->print(indent + 4);
         }
@@ -169,9 +230,9 @@ public:
 // FunctionNode：函数定义节点
 // 例如：int main() { ... }
 class FunctionNode : public ASTNode {
-    std::string returnType;             // 返回类型，例如 int
-    std::string name;                   // 函数名，例如 main
-    std::unique_ptr<ASTNode> body;      // 函数体，本质上是一个 BlockNode
+    std::string returnType;             // 返回类型
+    std::string name;                   // 函数名
+    std::unique_ptr<ASTNode> body;      // 函数体（本质上是 BlockNode）
 
 public:
     FunctionNode(std::string retType,

@@ -4,35 +4,52 @@
 #include <string>
 #include <vector>
 
-// 定义 Token 的类型
+// Token 类型枚举
 enum class TokenType {
-    Keyword_Int, 
-    Keyword_Return, // 【新增】"return"
-    Identifier, Number, Assign, Semicolon,
-    Plus, Minus, Star, Slash, LParen, RParen,
-    LBrace,         // 【新增】"{"
-    RBrace,         // 【新增】"}"
-    EndOfFile, Unknown
+    Keyword_Int,     // int
+    Keyword_Return,  // return
+    Keyword_If,      // if
+    Keyword_Else,    // else
+    Keyword_While,   // while
+
+    Identifier,      // 标识符，例如 a、main
+    Number,          // 数字，例如 123
+
+    Assign,          // =
+    EqualEqual,      // ==
+    NotEqual,        // !=
+    Less,            // <
+    Greater,         // >
+
+    Semicolon,       // ;
+    Plus,            // +
+    Minus,           // -
+    Star,            // *
+    Slash,           // /
+
+    LParen,          // (
+    RParen,          // )
+    LBrace,          // {
+    RBrace,          // }
+
+    EndOfFile        // 输入结束
 };
+
 // Token 结构体
 struct Token {
     TokenType type;
     std::string value;
 };
 
-// 词法扫描器类
+// Scanner：词法分析器
 class Scanner {
-public:
-    Scanner(const std::string& source);
-    std::vector<Token> tokenize(); // 核心方法：将源码转换为 Token 数组
-
 private:
-    std::string src;
-    size_t pos;      // 当前读取到的字符位置
-    
-    char peek();     // 查看当前字符（不移动指针）
-    char advance();  // 读取当前字符，并把指针向后移动一位
-    void skipWhitespace(); // 跳过空格和换行
+    std::string source;
+    size_t pos;
+
+public:
+    Scanner(const std::string& src);
+    std::vector<Token> tokenize();
 };
 
 #endif
