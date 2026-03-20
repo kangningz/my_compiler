@@ -16,6 +16,12 @@ iostream
 vector
 -
 
+/home/kangningz/project/my_compiler/src/lexer.cpp
+lexer.h
+/home/kangningz/project/my_compiler/src/lexer.h
+cctype
+-
+
 /home/kangningz/project/my_compiler/src/lexer.h
 string
 -
@@ -29,6 +35,14 @@ lexer.h
 /home/kangningz/project/my_compiler/src/lexer.h
 parser.h
 /home/kangningz/project/my_compiler/src/parser.h
+semantic.h
+/home/kangningz/project/my_compiler/src/semantic.h
+
+/home/kangningz/project/my_compiler/src/parser.cpp
+parser.h
+/home/kangningz/project/my_compiler/src/parser.h
+stdexcept
+-
 
 /home/kangningz/project/my_compiler/src/parser.h
 lexer.h
@@ -38,5 +52,23 @@ ast.h
 vector
 -
 memory
+-
+
+/home/kangningz/project/my_compiler/src/semantic.cpp
+semantic.h
+/home/kangningz/project/my_compiler/src/semantic.h
+stdexcept
+-
+typeinfo
+-
+
+/home/kangningz/project/my_compiler/src/semantic.h
+ast.h
+/home/kangningz/project/my_compiler/src/ast.h
+string
+-
+vector
+-
+unordered_set
 -
 

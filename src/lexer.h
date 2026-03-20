@@ -20,8 +20,11 @@ enum class TokenType {
     NotEqual,        // !=
     Less,            // <
     Greater,         // >
+    LessEqual,       // <=
+    GreaterEqual,    // >=
 
     Semicolon,       // ;
+    Comma,           // ,
     Plus,            // +
     Minus,           // -
     Star,            // *

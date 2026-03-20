@@ -73,6 +73,17 @@ std::vector<Token> Scanner::tokenize() {
             pos += 2;
             continue;
         }
+        if (current == '<' && pos + 1 < source.length() && source[pos + 1] == '=') {
+        tokens.push_back({TokenType::LessEqual, "<="});
+        pos += 2;
+        continue;
+        }
+
+        if (current == '>' && pos + 1 < source.length() && source[pos + 1] == '=') {
+        tokens.push_back({TokenType::GreaterEqual, ">="});
+        pos += 2;
+        continue;
+        }
 
         // 单字符符号
         switch (current) {
@@ -87,6 +98,9 @@ std::vector<Token> Scanner::tokenize() {
                 break;
             case ';':
                 tokens.push_back({TokenType::Semicolon, ";"});
+                break;
+            case ',':
+                tokens.push_back({TokenType::Comma, ","});
                 break;
             case '+':
                 tokens.push_back({TokenType::Plus, "+"});

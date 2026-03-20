@@ -30,6 +30,7 @@ private:
     std::unique_ptr<ASTNode> parseAssignment();
     std::unique_ptr<ASTNode> parseIfStatement();
     std::unique_ptr<ASTNode> parseWhileStatement();
+    std::vector<Parameter> parseParameterList();  //函数参数
     std::unique_ptr<ASTNode> parseFunction();
 
     // token 辅助函数

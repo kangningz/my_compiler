@@ -41,6 +41,10 @@ public:
         std::cout << std::string(indent, ' ')
                   << "IdentifierNode: " << name << "\n";
     }
+
+    const std::string& getName() const {
+    return name;
+}
 };
 
 // BinaryOpNode：二元运算节点
@@ -62,6 +66,47 @@ public:
 
         left->print(indent + 4);
         right->print(indent + 4);
+    }
+
+    const std::string& getOp() const {
+    return op;
+    }
+
+    const ASTNode* getLeft() const {
+        return left.get();
+    }
+
+    const ASTNode* getRight() const {
+        return right.get();
+    }
+};
+
+
+// UnaryOpNode：一元运算节点
+// 例如：-a、-5
+class UnaryOpNode : public ASTNode {
+    std::string op;
+    std::unique_ptr<ASTNode> operand;
+
+public:
+    UnaryOpNode(std::string oper, std::unique_ptr<ASTNode> expr)
+        : op(std::move(oper)), operand(std::move(expr)) {}
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ')
+                  << "UnaryOpNode: " << op << "\n";
+
+        if (operand) {
+            operand->print(indent + 4);
+        }
+    }
+
+    const std::string& getOp() const {
+        return op;
+    }
+
+    const ASTNode* getOperand() const {
+        return operand.get();
     }
 };
 
@@ -87,6 +132,18 @@ public:
             initExpr->print(indent + 4);
         }
     }
+
+    const std::string& getType() const {
+    return type;
+    }   
+
+    const std::string& getName() const {
+        return name;
+    }
+
+    const ASTNode* getInitExpr() const {
+        return initExpr.get();
+    }
 };
 
 // AssignmentNode：赋值语句节点
@@ -107,6 +164,14 @@ public:
             value->print(indent + 4);
         }
     }
+
+    const std::string& getName() const {
+    return name;
+    }
+
+    const ASTNode* getValue() const {
+        return value.get();
+    }
 };
 
 // ReturnNode：return 语句节点
@@ -125,6 +190,10 @@ public:
         if (returnValue) {
             returnValue->print(indent + 4);
         }
+    }
+
+    const ASTNode* getReturnValue() const {
+        return returnValue.get();
     }
 };
 
@@ -166,6 +235,19 @@ public:
             elseBlock->print(indent + 8);
         }
     }
+
+
+    const ASTNode* getCondition() const {
+    return condition.get(); 
+    }
+
+    const ASTNode* getThenBlock() const {
+        return thenBlock.get();
+    }
+
+    const ASTNode* getElseBlock() const {
+        return elseBlock.get();
+    }
 };
 
 // WhileNode：while 循环节点
@@ -196,6 +278,14 @@ public:
             body->print(indent + 8);
         }
     }
+
+    const ASTNode* getCondition() const {
+    return condition.get();
+    }
+
+    const ASTNode* getBody() const {
+        return body.get();
+    }
 };
 
 
@@ -225,21 +315,34 @@ public:
         std::cout << std::string(indent, ' ')
                   << "}\n";
     }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getStatements() const {
+    return statements;
+    }   
+};
+
+//参数结构体
+struct Parameter {
+    std::string type;
+    std::string name;
 };
 
 // FunctionNode：函数定义节点
 // 例如：int main() { ... }
 class FunctionNode : public ASTNode {
-    std::string returnType;             // 返回类型
-    std::string name;                   // 函数名
-    std::unique_ptr<ASTNode> body;      // 函数体（本质上是 BlockNode）
+    std::string returnType;                   // 返回类型
+    std::string name;                         // 函数名
+    std::vector<Parameter> parameters;        // 参数列表
+    std::unique_ptr<ASTNode> body;            // 函数体
 
 public:
     FunctionNode(std::string retType,
                  std::string funcName,
+                 std::vector<Parameter> params,
                  std::unique_ptr<ASTNode> funcBody)
         : returnType(std::move(retType)),
           name(std::move(funcName)),
+          parameters(std::move(params)),
           body(std::move(funcBody)) {}
 
     void print(int indent = 0) const override {
@@ -247,9 +350,33 @@ public:
                   << "FunctionNode (ReturnType: " << returnType
                   << ", Name: " << name << ")\n";
 
+        if (!parameters.empty()) {
+            std::cout << std::string(indent + 4, ' ') << "Parameters:\n";
+            for (const auto& param : parameters) {
+                std::cout << std::string(indent + 8, ' ')
+                          << param.type << " " << param.name << "\n";
+            }
+        }
+
         if (body) {
             body->print(indent + 4);
         }
+    }
+
+    const std::string& getReturnType() const {
+        return returnType;
+    }
+
+    const std::string& getName() const {
+        return name;
+    }
+
+    const std::vector<Parameter>& getParameters() const {
+        return parameters;
+    }
+
+    const ASTNode* getBody() const {
+        return body.get();
     }
 };
 

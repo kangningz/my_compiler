@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/my_compiler.dir/src/lexer.cpp.o"
   "CMakeFiles/my_compiler.dir/src/main.cpp.o"
   "CMakeFiles/my_compiler.dir/src/parser.cpp.o"
+  "CMakeFiles/my_compiler.dir/src/semantic.cpp.o"
   "my_compiler"
   "my_compiler.pdb"
 )

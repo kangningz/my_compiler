@@ -204,6 +204,33 @@ src/parser.cpp.s:
 	$(MAKE) -f CMakeFiles/my_compiler.dir/build.make CMakeFiles/my_compiler.dir/src/parser.cpp.s
 .PHONY : src/parser.cpp.s
 
+src/semantic.o: src/semantic.cpp.o
+
+.PHONY : src/semantic.o
+
+# target to build an object file
+src/semantic.cpp.o:
+	$(MAKE) -f CMakeFiles/my_compiler.dir/build.make CMakeFiles/my_compiler.dir/src/semantic.cpp.o
+.PHONY : src/semantic.cpp.o
+
+src/semantic.i: src/semantic.cpp.i
+
+.PHONY : src/semantic.i
+
+# target to preprocess a source file
+src/semantic.cpp.i:
+	$(MAKE) -f CMakeFiles/my_compiler.dir/build.make CMakeFiles/my_compiler.dir/src/semantic.cpp.i
+.PHONY : src/semantic.cpp.i
+
+src/semantic.s: src/semantic.cpp.s
+
+.PHONY : src/semantic.s
+
+# target to generate assembly for a file
+src/semantic.cpp.s:
+	$(MAKE) -f CMakeFiles/my_compiler.dir/build.make CMakeFiles/my_compiler.dir/src/semantic.cpp.s
+.PHONY : src/semantic.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -222,6 +249,9 @@ help:
 	@echo "... src/parser.o"
 	@echo "... src/parser.i"
 	@echo "... src/parser.s"
+	@echo "... src/semantic.o"
+	@echo "... src/semantic.i"
+	@echo "... src/semantic.s"
 .PHONY : help
 
 

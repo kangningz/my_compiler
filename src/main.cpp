@@ -1,24 +1,20 @@
 #include <iostream>
 #include "lexer.h"
 #include "parser.h"
+#include "semantic.h"
 
 int main() {
     std::string code = R"(
-int main() {
-    int a = 0;
-
-    while (a < 5) {
-        a = a + 1;
+    int add(int x, int y) {
+        int z = x + y;
+        return z;
     }
 
-    if(a == 1)
-    {
-        b = b + 1; 
+    int main() {
+        int a = 3;
+        return a;
     }
-
-    return a;
-}
-)"; //暂时无法支持语义分析，所以无法判断b未声明
+    )";
 
     std::cout << "Source Code:\n" << code << "\n";
 
@@ -39,6 +35,11 @@ int main() {
 
         if (ast) {
             ast->print();
+
+            std::cout << "\n--- Semantic Analysis ---\n";
+            SemanticAnalyzer analyzer;
+            analyzer.analyze(ast.get());
+            std::cout << "Semantic analysis passed.\n";
         } else {
             std::cout << "Nothing to parse.\n";
         }

@@ -30,6 +30,13 @@ bool Parser::match(TokenType type) {
 std::unique_ptr<ASTNode> Parser::parseFactor() {
     Token token = advance();
 
+    // 处理一元负号
+    // 例如：-5、-a、-(a + 1)
+    if (token.type == TokenType::Minus) {
+        auto operand = parseFactor();
+        return std::make_unique<UnaryOpNode>(token.value, std::move(operand));
+    }
+
     if (token.type == TokenType::Number) {
         return std::make_unique<NumberNode>(token.value);
     }
@@ -46,7 +53,7 @@ std::unique_ptr<ASTNode> Parser::parseFactor() {
         return expr;
     }
 
-    throw std::runtime_error("Syntax Error: Expected number, identifier, or '('");
+    throw std::runtime_error("Syntax Error: Expected number, identifier, unary '-', or '('");
 }
 
 // parseTerm：处理乘除
@@ -96,6 +103,8 @@ std::unique_ptr<ASTNode> Parser::parseComparison() {
 
     while (peek().type == TokenType::Less ||
            peek().type == TokenType::Greater ||
+           peek().type == TokenType::LessEqual ||
+           peek().type == TokenType::GreaterEqual ||
            peek().type == TokenType::EqualEqual ||
            peek().type == TokenType::NotEqual) {
         Token op = advance();
@@ -251,6 +260,39 @@ std::unique_ptr<ASTNode> Parser::parseWhileStatement() {
     );
 }
 
+
+//parseParameterList:解析函数参数
+std::vector<Parameter> Parser::parseParameterList() {
+    std::vector<Parameter> params;
+
+    // 空参数列表：直接返回
+    if (peek().type == TokenType::RParen) {
+        return params;
+    }
+
+    while (true) {
+        // 当前版本只支持 int 参数
+        if (!match(TokenType::Keyword_Int)) {
+            throw std::runtime_error("Syntax Error: Expected parameter type 'int'");
+        }
+
+        Token nameToken = advance();
+        if (nameToken.type != TokenType::Identifier) {
+            throw std::runtime_error("Syntax Error: Expected parameter name");
+        }
+
+        params.push_back({"int", nameToken.value});
+
+        if (match(TokenType::Comma)) {
+            continue;
+        }
+
+        break;
+    }
+
+    return params;
+}
+
 // parseFunction：解析函数定义
 // 当前支持：int main() { ... }
 std::unique_ptr<ASTNode> Parser::parseFunction() {
@@ -267,8 +309,10 @@ std::unique_ptr<ASTNode> Parser::parseFunction() {
         throw std::runtime_error("Syntax Error: Expected '(' after function name");
     }
 
+    auto params = parseParameterList();
+
     if (!match(TokenType::RParen)) {
-        throw std::runtime_error("Syntax Error: Expected ')' after '('");
+        throw std::runtime_error("Syntax Error: Expected ')' after parameter list");
     }
 
     auto body = parseBlock();
@@ -276,6 +320,7 @@ std::unique_ptr<ASTNode> Parser::parseFunction() {
     return std::make_unique<FunctionNode>(
         "int",
         nameToken.value,
+        std::move(params),
         std::move(body)
     );
 }

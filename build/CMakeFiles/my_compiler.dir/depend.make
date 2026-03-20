@@ -8,9 +8,14 @@ CMakeFiles/my_compiler.dir/src/main.cpp.o: ../src/ast.h
 CMakeFiles/my_compiler.dir/src/main.cpp.o: ../src/lexer.h
 CMakeFiles/my_compiler.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/my_compiler.dir/src/main.cpp.o: ../src/parser.h
+CMakeFiles/my_compiler.dir/src/main.cpp.o: ../src/semantic.h
 
 CMakeFiles/my_compiler.dir/src/parser.cpp.o: ../src/ast.h
 CMakeFiles/my_compiler.dir/src/parser.cpp.o: ../src/lexer.h
 CMakeFiles/my_compiler.dir/src/parser.cpp.o: ../src/parser.cpp
 CMakeFiles/my_compiler.dir/src/parser.cpp.o: ../src/parser.h
+
+CMakeFiles/my_compiler.dir/src/semantic.cpp.o: ../src/ast.h
+CMakeFiles/my_compiler.dir/src/semantic.cpp.o: ../src/semantic.cpp
+CMakeFiles/my_compiler.dir/src/semantic.cpp.o: ../src/semantic.h
 

@@ -7,6 +7,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/kangningz/project/my_compiler/src/lexer.cpp" "/home/kangningz/project/my_compiler/build/CMakeFiles/my_compiler.dir/src/lexer.cpp.o"
   "/home/kangningz/project/my_compiler/src/main.cpp" "/home/kangningz/project/my_compiler/build/CMakeFiles/my_compiler.dir/src/main.cpp.o"
   "/home/kangningz/project/my_compiler/src/parser.cpp" "/home/kangningz/project/my_compiler/build/CMakeFiles/my_compiler.dir/src/parser.cpp.o"
+  "/home/kangningz/project/my_compiler/src/semantic.cpp" "/home/kangningz/project/my_compiler/build/CMakeFiles/my_compiler.dir/src/semantic.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
