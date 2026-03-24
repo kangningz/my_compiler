@@ -1,3 +1,0 @@
-/home/kangningz/project/my_compiler/build/CMakeFiles/rebuild_cache.dir
-/home/kangningz/project/my_compiler/build/CMakeFiles/edit_cache.dir
-/home/kangningz/project/my_compiler/build/CMakeFiles/my_compiler.dir
