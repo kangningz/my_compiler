@@ -6,36 +6,49 @@
 #include <iostream>
 #include <vector>
 
+// ============================================================
 // ASTNode：所有语法树节点的基类
+// ============================================================
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
 
-    // print：以树状结构打印 AST
+    // 以树状结构打印 AST
     virtual void print(int indent = 0) const = 0;
 };
 
+// ============================================================
 // NumberNode：数字字面量节点
 // 例如：10、123
+// ============================================================
 class NumberNode : public ASTNode {
+private:
     std::string value;
 
 public:
-    NumberNode(std::string val) : value(std::move(val)) {}
+    explicit NumberNode(std::string val) : value(std::move(val)) {}
 
     void print(int indent = 0) const override {
         std::cout << std::string(indent, ' ')
                   << "NumberNode: " << value << "\n";
     }
+
+    // 返回数字字符串
+    const std::string& getValue() const {
+        return value;
+    }
 };
 
+// ============================================================
 // IdentifierNode：标识符节点
 // 例如：a、main
+// ============================================================
 class IdentifierNode : public ASTNode {
+private:
     std::string name;
 
 public:
-    IdentifierNode(std::string name) : name(std::move(name)) {}
+    explicit IdentifierNode(std::string name) : name(std::move(name)) {}
 
     void print(int indent = 0) const override {
         std::cout << std::string(indent, ' ')
@@ -43,13 +56,16 @@ public:
     }
 
     const std::string& getName() const {
-    return name;
-}
+        return name;
+    }
 };
 
+// ============================================================
 // BinaryOpNode：二元运算节点
-// 例如：a + 1、b * 2
+// 例如：a + 1、b * 2、a < b
+// ============================================================
 class BinaryOpNode : public ASTNode {
+private:
     std::string op;
     std::unique_ptr<ASTNode> left;
     std::unique_ptr<ASTNode> right;
@@ -64,12 +80,16 @@ public:
         std::cout << std::string(indent, ' ')
                   << "BinaryOpNode: " << op << "\n";
 
-        left->print(indent + 4);
-        right->print(indent + 4);
+        if (left) {
+            left->print(indent + 4);
+        }
+        if (right) {
+            right->print(indent + 4);
+        }
     }
 
     const std::string& getOp() const {
-    return op;
+        return op;
     }
 
     const ASTNode* getLeft() const {
@@ -81,10 +101,12 @@ public:
     }
 };
 
-
+// ============================================================
 // UnaryOpNode：一元运算节点
 // 例如：-a、-5
+// ============================================================
 class UnaryOpNode : public ASTNode {
+private:
     std::string op;
     std::unique_ptr<ASTNode> operand;
 
@@ -110,12 +132,15 @@ public:
     }
 };
 
+// ============================================================
 // VariableDeclNode：变量声明节点
 // 例如：int a = 10;
+// ============================================================
 class VariableDeclNode : public ASTNode {
-    std::string type;                     // 类型，例如 int
-    std::string name;                     // 变量名，例如 a
-    std::unique_ptr<ASTNode> initExpr;    // 初始化表达式
+private:
+    std::string type;                  // 变量类型，例如 int
+    std::string name;                  // 变量名，例如 a
+    std::unique_ptr<ASTNode> initExpr; // 初始化表达式
 
 public:
     VariableDeclNode(std::string t,
@@ -134,8 +159,8 @@ public:
     }
 
     const std::string& getType() const {
-    return type;
-    }   
+        return type;
+    }
 
     const std::string& getName() const {
         return name;
@@ -146,11 +171,14 @@ public:
     }
 };
 
+// ============================================================
 // AssignmentNode：赋值语句节点
 // 例如：a = a + 1;
+// ============================================================
 class AssignmentNode : public ASTNode {
-    std::string name;                  // 左边被赋值的变量名
-    std::unique_ptr<ASTNode> value;    // 右边的表达式
+private:
+    std::string name;
+    std::unique_ptr<ASTNode> value;
 
 public:
     AssignmentNode(std::string n, std::unique_ptr<ASTNode> v)
@@ -166,7 +194,7 @@ public:
     }
 
     const std::string& getName() const {
-    return name;
+        return name;
     }
 
     const ASTNode* getValue() const {
@@ -174,13 +202,42 @@ public:
     }
 };
 
+// ============================================================
+// ExprStatementNode：表达式语句节点
+// 当前主要用于支持函数调用语句，例如：foo();
+// ============================================================
+class ExprStatementNode : public ASTNode {
+private:
+    std::unique_ptr<ASTNode> expr;
+
+public:
+    explicit ExprStatementNode(std::unique_ptr<ASTNode> e)
+        : expr(std::move(e)) {}
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ')
+                  << "ExprStatementNode\n";
+
+        if (expr) {
+            expr->print(indent + 4);
+        }
+    }
+
+    const ASTNode* getExpr() const {
+        return expr.get();
+    }
+};
+
+// ============================================================
 // ReturnNode：return 语句节点
 // 例如：return a + 1;
+// ============================================================
 class ReturnNode : public ASTNode {
+private:
     std::unique_ptr<ASTNode> returnValue;
 
 public:
-    ReturnNode(std::unique_ptr<ASTNode> expr)
+    explicit ReturnNode(std::unique_ptr<ASTNode> expr)
         : returnValue(std::move(expr)) {}
 
     void print(int indent = 0) const override {
@@ -197,12 +254,15 @@ public:
     }
 };
 
+// ============================================================
 // IfNode：if / else 语句节点
 // 例如：if (a < 10) { ... } else { ... }
+// ============================================================
 class IfNode : public ASTNode {
-    std::unique_ptr<ASTNode> condition;   // if 条件
-    std::unique_ptr<ASTNode> thenBlock;   // 条件成立时执行的语句块
-    std::unique_ptr<ASTNode> elseBlock;   // else 部分，可为空
+private:
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> thenBlock;
+    std::unique_ptr<ASTNode> elseBlock;
 
 public:
     IfNode(std::unique_ptr<ASTNode> cond,
@@ -228,7 +288,6 @@ public:
             thenBlock->print(indent + 8);
         }
 
-        // 如果有 else，就继续打印
         if (elseBlock) {
             std::cout << std::string(indent + 4, ' ')
                       << "Else:\n";
@@ -236,9 +295,8 @@ public:
         }
     }
 
-
     const ASTNode* getCondition() const {
-    return condition.get(); 
+        return condition.get();
     }
 
     const ASTNode* getThenBlock() const {
@@ -250,11 +308,14 @@ public:
     }
 };
 
+// ============================================================
 // WhileNode：while 循环节点
 // 例如：while (a < 5) { ... }
+// ============================================================
 class WhileNode : public ASTNode {
-    std::unique_ptr<ASTNode> condition;   // 循环条件
-    std::unique_ptr<ASTNode> body;        // 循环体
+private:
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> body;
 
 public:
     WhileNode(std::unique_ptr<ASTNode> cond,
@@ -280,7 +341,7 @@ public:
     }
 
     const ASTNode* getCondition() const {
-    return condition.get();
+        return condition.get();
     }
 
     const ASTNode* getBody() const {
@@ -288,18 +349,19 @@ public:
     }
 };
 
-
+// ============================================================
 // BlockNode：代码块节点
 // 例如：
 // {
 //     int a = 10;
 //     return a;
 // }
+// ============================================================
 class BlockNode : public ASTNode {
+private:
     std::vector<std::unique_ptr<ASTNode>> statements;
 
 public:
-    // 添加一条语句到 block 中
     void addStatement(std::unique_ptr<ASTNode> stmt) {
         statements.push_back(std::move(stmt));
     }
@@ -317,23 +379,28 @@ public:
     }
 
     const std::vector<std::unique_ptr<ASTNode>>& getStatements() const {
-    return statements;
-    }   
+        return statements;
+    }
 };
 
-//参数结构体
+// ============================================================
+// Parameter：函数参数结构体
+// ============================================================
 struct Parameter {
     std::string type;
     std::string name;
 };
 
+// ============================================================
 // FunctionNode：函数定义节点
 // 例如：int main() { ... }
+// ============================================================
 class FunctionNode : public ASTNode {
-    std::string returnType;                   // 返回类型
-    std::string name;                         // 函数名
-    std::vector<Parameter> parameters;        // 参数列表
-    std::unique_ptr<ASTNode> body;            // 函数体
+private:
+    std::string returnType;
+    std::string name;
+    std::vector<Parameter> parameters;
+    std::unique_ptr<ASTNode> body;
 
 public:
     FunctionNode(std::string retType,
@@ -351,7 +418,8 @@ public:
                   << ", Name: " << name << ")\n";
 
         if (!parameters.empty()) {
-            std::cout << std::string(indent + 4, ' ') << "Parameters:\n";
+            std::cout << std::string(indent + 4, ' ')
+                      << "Parameters:\n";
             for (const auto& param : parameters) {
                 std::cout << std::string(indent + 8, ' ')
                           << param.type << " " << param.name << "\n";
@@ -377,6 +445,43 @@ public:
 
     const ASTNode* getBody() const {
         return body.get();
+    }
+};
+
+// ============================================================
+// CallNode：函数调用节点
+// 例如：add(3, 4)
+// ============================================================
+class CallNode : public ASTNode {
+private:
+    std::string calleeName;
+    std::vector<std::unique_ptr<ASTNode>> arguments;
+
+public:
+    CallNode(std::string name,
+             std::vector<std::unique_ptr<ASTNode>> args)
+        : calleeName(std::move(name)),
+          arguments(std::move(args)) {}
+
+    void print(int indent = 0) const override {
+        std::cout << std::string(indent, ' ')
+                  << "CallNode: " << calleeName << "\n";
+
+        if (!arguments.empty()) {
+            std::cout << std::string(indent + 4, ' ')
+                      << "Arguments:\n";
+            for (const auto& arg : arguments) {
+                arg->print(indent + 8);
+            }
+        }
+    }
+
+    const std::string& getCalleeName() const {
+        return calleeName;
+    }
+
+    const std::vector<std::unique_ptr<ASTNode>>& getArguments() const {
+        return arguments;
     }
 };
 
