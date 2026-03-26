@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # my_compiler
 
 一个基于 **C++17 + LLVM** 实现的 MiniC 编译器项目。  
@@ -49,7 +48,7 @@
 
 ## 3. 项目结构
 
-my_compiler/
+*my_compiler/
 ├── CMakeLists.txt
 ├── README.md
 ├── examples/
@@ -68,7 +67,7 @@ my_compiler/
 │   ├── codegen.h
 │   ├── codegen.cpp
 │   └── main.cpp
-└── test/
+└── test/*
 
 ---
 
