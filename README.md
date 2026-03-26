@@ -48,7 +48,8 @@
 
 ## 3. 项目结构
 
-*my_compiler/
+```text
+my_compiler/
 ├── CMakeLists.txt
 ├── README.md
 ├── examples/
@@ -67,7 +68,8 @@
 │   ├── codegen.h
 │   ├── codegen.cpp
 │   └── main.cpp
-└── test/*
+└── test/
+```
 
 ---
 
