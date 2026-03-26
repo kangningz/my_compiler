@@ -68,23 +68,24 @@ my_compiler/
 │   ├── codegen.h
 │   ├── codegen.cpp
 │   └── main.cpp
-└── test/
 ```
 
 ---
 
 ## 4. 开发环境
 
+```text
 Ubuntu 20.04.4
 VSCode
 CMake >= 3.16
 C++17
 LLVM 20
-
+```
 ---
 
 ## 5. 编译方式
 
+```text
 在项目根目录下执行：
 mkdir -p build
 cmake -S . -B build -DLLVM_DIR=/usr/lib/llvm-20/lib/cmake/llvm
@@ -92,11 +93,12 @@ cmake --build build -j
 
 编译完成后，可执行文件位于：
 build/my_compiler
-
+```
 ---
 
 ## 6. 使用方式
 
+```text
 先进入构建目录：
 cd build
 
@@ -115,11 +117,12 @@ cd build
 执行LLVM IR
 lli-20 add.ll
 echo $?
-
+```
 ---
 
 ## 7. 当前实现的编译流程
 
+```text
 MiniC source (.mc)
 -> Lexer
 -> Parser
@@ -127,25 +130,26 @@ MiniC source (.mc)
 -> Semantic Analysis
 -> LLVM IR (.ll)
 -> lli execution
-
+```
 ---
 
 ## 8. 当前已完成的阶段性成果
-
+```text
 完成手写词法分析器
 完成递归下降语法分析器
 完成 AST 设计与构建
 完成基本语义分析
 完成 LLVM IR 生成
 已验证 add / if / while 示例可通过 lli 执行
-
+```
 ---
 
 ## 9.后续计划
 
+```text
 补充更多测试样例
 改进错误提示信息
 支持生成 object file
 尝试接入 LLVM 优化 pass
 持续完善 README 和项目文档
-
+```
