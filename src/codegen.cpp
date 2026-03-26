@@ -70,7 +70,7 @@ llvm::AllocaInst* CodeGenerator::createEntryBlockAlloca(
 
     llvm::IRBuilder<> tempBuilder(
         &function->getEntryBlock(),
-        function->getEntryBlock().begin()
+        function->getEntryBlock().begin()  //
     );
 
     return tempBuilder.CreateAlloca(
@@ -267,11 +267,20 @@ void CodeGenerator::genStmt(const ASTNode* node) {
         enterScope();
 
         for (const auto& stmt : blockNode->getStatements()) {
-            // 如果当前基本块已经有终结指令（如 ret / br），
-            // 后面的语句就不应该再继续生成 IR。
-            if (builder_.GetInsertBlock()->getTerminator() != nullptr) {
+            llvm::BasicBlock* currentBB = builder_.GetInsertBlock();
+
+            // 防御性检查：如果当前没有合法插入块，直接报错
+            if (!currentBB) {
+                exitScope();
+                throw std::runtime_error("CodeGen Error: no valid insert block when generating BlockNode");
+            }
+
+            // 如果当前基本块已经结束（比如已经 ret / br），
+            // 后续语句不应继续生成
+            if (currentBB->getTerminator() != nullptr) {
                 break;
             }
+
             genStmt(stmt.get());
         }
 
@@ -281,63 +290,86 @@ void CodeGenerator::genStmt(const ASTNode* node) {
 
     // -------- if / else --------
     if (auto ifNode = dynamic_cast<const IfNode*>(node)) {
+        llvm::BasicBlock* currentBB = builder_.GetInsertBlock();
+        if (!currentBB) {
+            throw std::runtime_error("CodeGen Error: no valid insert block before IfNode");
+        }
+
+        llvm::Function* function = currentBB->getParent();
+        if (!function) {
+            throw std::runtime_error("CodeGen Error: IfNode is not inside a valid function");
+        }
+
+        // 1) 生成条件表达式
         llvm::Value* condValue = genExpr(ifNode->getCondition());
 
-        // 条件统一按“非 0 为真”处理
+        // 2) 统一按“非 0 为真”处理条件
         condValue = builder_.CreateICmpNE(
             condValue,
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(context_), 0),
             "ifcond"
         );
 
-        llvm::Function* function = builder_.GetInsertBlock()->getParent();
-
-        llvm::BasicBlock* thenBB = llvm::BasicBlock::Create(context_, "then", function);
-        llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context_, "ifend");
-        llvm::BasicBlock* elseBB = nullptr;
+        // 3) 创建基本块
+        llvm::BasicBlock* thenBB  = llvm::BasicBlock::Create(context_, "then", function);
+        llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context_, "ifend", function);
+        llvm::BasicBlock* elseBB  = nullptr;
 
         if (ifNode->getElseBlock()) {
-        elseBB = llvm::BasicBlock::Create(context_, "else", function);
-        builder_.CreateCondBr(condValue, thenBB, elseBB);
+            elseBB = llvm::BasicBlock::Create(context_, "else", function);
+            builder_.CreateCondBr(condValue, thenBB, elseBB);
         } else {
-        builder_.CreateCondBr(condValue, thenBB, mergeBB);
+            builder_.CreateCondBr(condValue, thenBB, mergeBB);
         }
 
-        // 生成 then 分支
+        // 4) 生成 then 分支
         builder_.SetInsertPoint(thenBB);
         genStmt(ifNode->getThenBlock());
 
-        if (builder_.GetInsertBlock()->getTerminator() == nullptr) {
+        llvm::BasicBlock* thenEndBB = builder_.GetInsertBlock();
+        if (thenEndBB && thenEndBB->getTerminator() == nullptr) {
             builder_.CreateBr(mergeBB);
         }
 
-        // 生成 else 分支
+        // 5) 生成 else 分支（如果存在）
         if (ifNode->getElseBlock()) {
             builder_.SetInsertPoint(elseBB);
             genStmt(ifNode->getElseBlock());
 
-            if (builder_.GetInsertBlock()->getTerminator() == nullptr) {
+            llvm::BasicBlock* elseEndBB = builder_.GetInsertBlock();
+            if (elseEndBB && elseEndBB->getTerminator() == nullptr) {
                 builder_.CreateBr(mergeBB);
             }
         }
 
-        // 把 merge block 加到函数里，并把插入点切过去
+        // 6) 后续代码继续往 mergeBB 里写
         builder_.SetInsertPoint(mergeBB);
         return;
     }
 
     // -------- while --------
     if (auto whileNode = dynamic_cast<const WhileNode*>(node)) {
-        llvm::Function* function = builder_.GetInsertBlock()->getParent();
+        llvm::BasicBlock* currentBB = builder_.GetInsertBlock();
+        if (!currentBB) {
+            throw std::runtime_error("CodeGen Error: no valid insert block before WhileNode");
+        }
 
+        llvm::Function* function = currentBB->getParent();
+        if (!function) {
+            throw std::runtime_error("CodeGen Error: WhileNode is not inside a valid function");
+        }
+
+        // 创建循环相关的基本块
         llvm::BasicBlock* condBB = llvm::BasicBlock::Create(context_, "while.cond", function);
         llvm::BasicBlock* bodyBB = llvm::BasicBlock::Create(context_, "while.body", function);
         llvm::BasicBlock* endBB  = llvm::BasicBlock::Create(context_, "while.end", function);
 
-        // 先跳到条件判断块
-        builder_.CreateBr(condBB);
+        // 如果当前块还没结束，先跳到条件块
+        if (currentBB->getTerminator() == nullptr) {
+            builder_.CreateBr(condBB);
+        }
 
-        // 生成条件块
+        // 1) 生成条件判断块
         builder_.SetInsertPoint(condBB);
         llvm::Value* condValue = genExpr(whileNode->getCondition());
         condValue = builder_.CreateICmpNE(
@@ -345,18 +377,18 @@ void CodeGenerator::genStmt(const ASTNode* node) {
             llvm::ConstantInt::get(llvm::Type::getInt32Ty(context_), 0),
             "whilecond"
         );
-
         builder_.CreateCondBr(condValue, bodyBB, endBB);
 
-        // 生成循环体
+        // 2) 生成循环体
         builder_.SetInsertPoint(bodyBB);
         genStmt(whileNode->getBody());
 
-        if (builder_.GetInsertBlock()->getTerminator() == nullptr) {
+        llvm::BasicBlock* bodyEndBB = builder_.GetInsertBlock();
+        if (bodyEndBB && bodyEndBB->getTerminator() == nullptr) {
             builder_.CreateBr(condBB);
         }
 
-        // 生成循环结束块
+        // 3) 后续代码继续写到 endBB
         builder_.SetInsertPoint(endBB);
         return;
     }
