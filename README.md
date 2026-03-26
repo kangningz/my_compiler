@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # my_compiler
 
 一个基于 **C++17 + LLVM** 实现的 MiniC 编译器项目。  
@@ -146,3 +147,4 @@ MiniC source (.mc)
 支持生成 object file
 尝试接入 LLVM 优化 pass
 持续完善 README 和项目文档
+
